@@ -1,0 +1,20 @@
+Modify reciever.py when regenerating
+
+Define:
+    def set_usb_contexts(usb1, usb3):
+        global usb_1, usb_3
+        usb_1 = usb1
+        usb_3 = usb3
+Variables:
+        self.usb_3 = usb_3
+        self.usb_1 = usb_1
+
+Add at the start of main:
+    # ADDED THE FOLLOWING IF BLOCK
+    if len(sys.argv) > 2:
+        usb1_arg = sys.argv[1]
+        usb3_arg = sys.argv[2]
+        set_usb_contexts(usb1_arg, usb3_arg)
+    else:
+        print("Usage: python3 reciever.py <usb_1> <usb_3>")
+        sys.exit(1)
