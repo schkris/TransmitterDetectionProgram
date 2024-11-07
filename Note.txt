@@ -2,12 +2,12 @@ Modify reciever.py when regenerating
 
 Define:
     def set_usb_contexts(usb1, usb3):
-        global usb_1, usb_3
-        usb_1 = usb1
-        usb_3 = usb3
+        global usb_bottom_diff_1, usb_top_sum_3
+        usb_bottom_diff_1 = usb1
+        usb_top_sum_3 = usb3
 Variables:
-        self.usb_3 = usb_3
-        self.usb_1 = usb_1
+        self.usb_3 = usb_top_sum_3
+        self.usb_1 = usb_bottom_diff_1
 
 Add at the start of main:
     # ADDED THE FOLLOWING IF BLOCK
