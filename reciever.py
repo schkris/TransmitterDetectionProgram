@@ -38,7 +38,6 @@ from gnuradio import zeromq
 
 from gnuradio import qtgui
 
-
 def set_usb_contexts(usb1, usb3):
     global usb_bottom_diff_1, usb_top_sum_3
     usb_bottom_diff_1 = usb1
@@ -80,20 +79,21 @@ class reciever(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.usb_top_sum_3 = usb_top_sum_3
-        self.usb_bottom_diff_1 = usb_bottom_diff_1
+        self.usb_3 = usb_top_sum_3
+        self.usb_1 = usb_bottom_diff_1
         self.samp_rate = samp_rate = 5000000
 
         ##################################################
         # Blocks
         ##################################################
 
+        self.zeromq_push_sink_0_0_0_0 = zeromq.push_sink(gr.sizeof_float, 1, 'tcp://*:5558', 100, False, (-1))
         self.zeromq_push_sink_0_0_0 = zeromq.push_sink(gr.sizeof_float, 1, 'tcp://*:5557', 100, False, (-1))
         self.zeromq_push_sink_0_0 = zeromq.push_sink(gr.sizeof_float, 1, 'tcp://*:5556', 100, False, (-1))
         self.zeromq_push_sink_0 = zeromq.push_sink(gr.sizeof_float, 1, 'tcp://*:5555', 100, False, (-1))
         self.iio_pluto_source_0_0 = iio.fmcomms2_source_fc32(usb_top_sum_3 if usb_top_sum_3 else iio.get_pluto_uri(), [True, True], 32768)
         self.iio_pluto_source_0_0.set_len_tag_key('packet_len')
-        self.iio_pluto_source_0_0.set_frequency(2399000000)
+        self.iio_pluto_source_0_0.set_frequency(2400000000)
         self.iio_pluto_source_0_0.set_samplerate(samp_rate)
         self.iio_pluto_source_0_0.set_gain_mode(0, 'slow_attack')
         self.iio_pluto_source_0_0.set_gain(0, 64)
@@ -103,7 +103,7 @@ class reciever(gr.top_block, Qt.QWidget):
         self.iio_pluto_source_0_0.set_filter_params('Auto', '', 0, 0)
         self.iio_pluto_source_0 = iio.fmcomms2_source_fc32(usb_bottom_diff_1 if usb_bottom_diff_1 else iio.get_pluto_uri(), [True, True], 32768)
         self.iio_pluto_source_0.set_len_tag_key('packet_len')
-        self.iio_pluto_source_0.set_frequency(2399000000)
+        self.iio_pluto_source_0.set_frequency(2400000000)
         self.iio_pluto_source_0.set_samplerate(samp_rate)
         self.iio_pluto_source_0.set_gain_mode(0, 'slow_attack')
         self.iio_pluto_source_0.set_gain(0, 64)
@@ -111,8 +111,15 @@ class reciever(gr.top_block, Qt.QWidget):
         self.iio_pluto_source_0.set_rfdc(True)
         self.iio_pluto_source_0.set_bbdc(True)
         self.iio_pluto_source_0.set_filter_params('Auto', '', 0, 0)
-        self.blocks_sub_xx_1 = blocks.sub_ff(1)
         self.blocks_sub_xx_0 = blocks.sub_cc(1)
+        self.blocks_moving_average_xx_0_2 = blocks.moving_average_ff(2500000, 0.0000004, 25000, 1)
+        self.blocks_moving_average_xx_0_1 = blocks.moving_average_ff(2500000, 0.0000004, 25000, 1)
+        self.blocks_moving_average_xx_0_0 = blocks.moving_average_ff(2500000, 0.0000004, 25000, 1)
+        self.blocks_moving_average_xx_0 = blocks.moving_average_ff(2500000, 0.0000004, 25000, 1)
+        self.blocks_keep_one_in_n_0_0_1 = blocks.keep_one_in_n(gr.sizeof_float*1, 2500000)
+        self.blocks_keep_one_in_n_0_0_0 = blocks.keep_one_in_n(gr.sizeof_float*1, 2500000)
+        self.blocks_keep_one_in_n_0_0 = blocks.keep_one_in_n(gr.sizeof_float*1, 2500000)
+        self.blocks_keep_one_in_n_0 = blocks.keep_one_in_n(gr.sizeof_float*1, 2500000)
         self.blocks_complex_to_mag_squared_0_0 = blocks.complex_to_mag_squared(1)
         self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(1)
         self.blocks_complex_to_arg_0_0 = blocks.complex_to_arg(1)
@@ -146,12 +153,19 @@ class reciever(gr.top_block, Qt.QWidget):
         self.connect((self.band_pass_filter_0, 0), (self.blocks_complex_to_mag_squared_0, 0))
         self.connect((self.band_pass_filter_0_0, 0), (self.blocks_complex_to_mag_squared_0_0, 0))
         self.connect((self.blocks_add_xx_0, 0), (self.blocks_complex_to_arg_0, 0))
-        self.connect((self.blocks_complex_to_arg_0, 0), (self.blocks_sub_xx_1, 0))
-        self.connect((self.blocks_complex_to_arg_0_0, 0), (self.blocks_sub_xx_1, 1))
-        self.connect((self.blocks_complex_to_mag_squared_0, 0), (self.zeromq_push_sink_0, 0))
-        self.connect((self.blocks_complex_to_mag_squared_0_0, 0), (self.zeromq_push_sink_0_0, 0))
+        self.connect((self.blocks_complex_to_arg_0, 0), (self.blocks_moving_average_xx_0_1, 0))
+        self.connect((self.blocks_complex_to_arg_0_0, 0), (self.blocks_moving_average_xx_0_2, 0))
+        self.connect((self.blocks_complex_to_mag_squared_0, 0), (self.blocks_moving_average_xx_0, 0))
+        self.connect((self.blocks_complex_to_mag_squared_0_0, 0), (self.blocks_moving_average_xx_0_0, 0))
+        self.connect((self.blocks_keep_one_in_n_0, 0), (self.zeromq_push_sink_0, 0))
+        self.connect((self.blocks_keep_one_in_n_0_0, 0), (self.zeromq_push_sink_0_0, 0))
+        self.connect((self.blocks_keep_one_in_n_0_0_0, 0), (self.zeromq_push_sink_0_0_0, 0))
+        self.connect((self.blocks_keep_one_in_n_0_0_1, 0), (self.zeromq_push_sink_0_0_0_0, 0))
+        self.connect((self.blocks_moving_average_xx_0, 0), (self.blocks_keep_one_in_n_0, 0))
+        self.connect((self.blocks_moving_average_xx_0_0, 0), (self.blocks_keep_one_in_n_0_0, 0))
+        self.connect((self.blocks_moving_average_xx_0_1, 0), (self.blocks_keep_one_in_n_0_0_0, 0))
+        self.connect((self.blocks_moving_average_xx_0_2, 0), (self.blocks_keep_one_in_n_0_0_1, 0))
         self.connect((self.blocks_sub_xx_0, 0), (self.blocks_complex_to_arg_0_0, 0))
-        self.connect((self.blocks_sub_xx_1, 0), (self.zeromq_push_sink_0_0_0, 0))
         self.connect((self.iio_pluto_source_0, 0), (self.band_pass_filter_0, 0))
         self.connect((self.iio_pluto_source_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.iio_pluto_source_0, 0), (self.blocks_sub_xx_0, 1))
@@ -194,7 +208,7 @@ class reciever(gr.top_block, Qt.QWidget):
 
 
 def main(top_block_cls=reciever, options=None):
-    
+
     # ADDED THE FOLLOWING IF BLOCK
     if len(sys.argv) > 2:
         usb1_arg = sys.argv[1]
