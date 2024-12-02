@@ -8,7 +8,7 @@ import time
 # Attach Diff to Bottom Serial (1)
 
 # Define serials for each SDR (update these with your device's serial numbers)
-bottom_serial = "1044734c960500130c002500984b4fbf2e"
+bottom_serial = "1044734c9605000d0e001900deb64fc692"
 top_serial = "1044734c9605000cebff2e006fcc4f52b4"
 
 def find_iio_contexts():
@@ -34,7 +34,7 @@ def find_iio_contexts():
 
 def start_gnuradio_flowgraph(bottom_usb, top_usb):
     # Pass the USB URIs as command-line arguments
-    gnuradio_process = subprocess.Popen(['python3', './reciever.py', bottom_usb, top_usb])
+    gnuradio_process = subprocess.Popen(['python3', './receiver.py', bottom_usb, top_usb])
     return gnuradio_process
 
 def start_direction_finding_script():
@@ -56,7 +56,7 @@ def main():
         while True:
             if gnuradio_process.poll() is not None or df_process.poll() is not None:
                 print("A subprocess has stopped unexpectedly. Restarting...")
-                gnuradio_process = start_gnuradio_flowgraph()
+                gnuradio_process = start_gnuradio_flowgraph(bottom_usb, top_usb)
                 df_process = start_direction_finding_script()
             time.sleep(5)
     except KeyboardInterrupt:
